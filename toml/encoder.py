@@ -193,9 +193,21 @@ class TomlEncoder(object):
             if not isinstance(o[section], dict):
                 arrayoftables = False
                 if isinstance(o[section], list):
+                    elem_type = None
+                    upgrade_to_float = False
                     for a in o[section]:
+                        if elem_type is None:
+                            elem_type = type(a)
+                        if (
+                            elem_type in (int, float) and
+                            elem_type != type(a)
+                        ):
+                            upgrade_to_float = True
                         if isinstance(a, dict):
                             arrayoftables = True
+                    if upgrade_to_float:
+                        for index, a in enumerate(o[section]):
+                            o[section][index] = float(a)
                 if arrayoftables:
                     for a in o[section]:
                         arraytabstr = "\n"
